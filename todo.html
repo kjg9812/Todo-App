@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TODO APP</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1 id="top">DO THIS SH*T</h1>
+    </header>
+    <form>
+      <input id="todo-title" type="text" />
+      <input id="date-picker" type="date" />
+      <button type="button" onclick="addTodo()">Add</button>
+    </form>
+    <section class="todo">
+      <div id="todo-list"></div>
+    </section>
+
+    <script>
+      //Models
+
+      //array to store todo items
+      let todos;
+      const savedTodos = JSON.parse(localStorage.getItem("todos"));
+      if (Array.isArray(savedTodos)) {
+        todos = savedTodos;
+      } else {
+        todos = [];
+      }
+      function createTodo(title, dueDate, isDone) {
+        const id = "" + new Date().getTime();
+        //adding todo object to array
+        todos.push({
+          title: title,
+          dueDate: dueDate,
+          id: id,
+          isDone: isDone,
+          isEditing: undefined,
+        });
+        saveTodos();
+      }
+      function removeTodo(idToDelete) {
+        //updating todos array when delete button is clicked
+        todos = todos.filter(function (todo) {
+          if (todo.id === idToDelete) {
+            return false;
+          } else {
+            return true;
+          }
+        });
+        saveTodos();
+      }
+
+      function changeDone(idToChange, cheked) {
+        let item;
+        for (let i = 0; i < todos.length; i++) {
+          if (todos[i].id === idToChange) {
+            item = todos[i];
+          }
+        }
+        item.isDone = cheked;
+      }
+
+      function saveTodos() {
+        localStorage.setItem("todos", JSON.stringify(todos));
+      }
+
+      function changeIsEdit(idToChange) {
+        let item;
+        for (let i = 0; i < todos.length; i++) {
+          if (todos[i].id === idToChange) {
+            item = todos[i];
+          }
+        }
+        item.isEditing = true;
+      }
+
+      function update(idToChange, title, dueDate) {
+        let item;
+        for (let i = 0; i < todos.length; i++) {
+          if (todos[i].id === idToChange) {
+            item = todos[i];
+          }
+        }
+        item.title = title;
+        item.dueDate = dueDate;
+        item.isEditing = false;
+      }
+
+      //View
+      render();
+      function render() {
+        //reset our list
+        document.getElementById("todo-list").innerHTML = "";
+
+        todos.forEach(function (todo) {
+          if (todo.isEditing === true) {
+            const element = document.createElement("div");
+            const textbox = document.createElement("input");
+            const datepicker = document.createElement("input");
+            textbox.type = "text";
+            datepicker.type = "date";
+            const updateButton = document.createElement("button");
+            updateButton.innerText = "Update";
+            updateButton.id = todo.id;
+            textbox.id = todo.id + "text";
+            datepicker.id = todo.id + "date";
+            updateButton.onclick = updateFunction;
+            element.appendChild(textbox);
+            element.appendChild(datepicker);
+            element.appendChild(updateButton);
+            const todolist = document.getElementById("todo-list");
+            todolist.appendChild(element);
+          } else {
+            //new div
+            const element = document.createElement("div");
+            element.innerText = todo.title + " " + todo.dueDate;
+
+            //new edit button
+            const editButton = document.createElement("button");
+            editButton.innerText = "Edit";
+            editButton.onclick = changeIsEditing;
+            editButton.id = todo.id;
+            element.appendChild(editButton);
+
+            //new delete button
+            const deleteButton = document.createElement("button");
+            deleteButton.innerText = "Delete";
+            deleteButton.style = "margin-left: 12px; ";
+            deleteButton.onclick = deleteTodo;
+            deleteButton.id = todo.id;
+            element.appendChild(deleteButton);
+
+            if (todo.isDone === true) {
+              check.checked = true;
+            }
+
+            //adding new div to existing div
+            const todolist = document.getElementById("todo-list");
+            todolist.appendChild(element);
+          }
+        });
+      }
+
+      //Controller
+
+      function addTodo() {
+        const textbox = document.getElementById("todo-title");
+        const title = textbox.value;
+        const dateitem = document.getElementById("date-picker");
+        const datePicker = document.getElementById("date-picker");
+        const dueDate = datePicker.value;
+        let isDone = false;
+        //calling function to create a todo item
+        createTodo(title, dueDate, isDone);
+        render();
+        console.log("added");
+      }
+
+      function deleteTodo(event) {
+        const deleteButton = event.target;
+        const idToDelete = deleteButton.id;
+        //calling function to delete a todo item
+        removeTodo(idToDelete);
+        render();
+      }
+
+      function changeDoneOne(event) {
+        const checkz = event.target;
+        const idToChange = checkz.id;
+        let cheked = checkz.checked;
+        changeDone(idToChange, cheked);
+        render();
+      }
+
+      function changeIsEditing(event) {
+        console.log(event);
+        const editButton = event.target;
+        const idToChange = editButton.id;
+        changeIsEdit(idToChange);
+        render();
+      }
+
+      function updateFunction(event) {
+        console.log(event);
+        const updateButton = event.target;
+        console.log(updateButton.todoId);
+        const idToChange = updateButton.id;
+        const textboxz = document.getElementById(idToChange + "text");
+        const title = textboxz.value;
+        const datePicker = document.getElementById(idToChange + "date");
+        const dueDate = datePicker.value;
+        update(idToChange, title, dueDate);
+        render();
+      }
+    </script>
+  </body>
+</html>
